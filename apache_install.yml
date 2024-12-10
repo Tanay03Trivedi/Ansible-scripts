@@ -1,0 +1,14 @@
+- name: Install Apache on Web Servers
+  hosts: Free
+  become: true  # Use sudo
+  tasks:
+    - name: Ensure Apache is installed
+      apt:
+        name: apache2
+        state: present
+
+    - name: Start Apache service
+      service:
+        name: apache2
+        state: started
+        enabled: true

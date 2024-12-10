@@ -1,0 +1,19 @@
+- name: Update and Upgrade Servers
+  hosts: all
+  become: true  # Use sudo privileges
+  tasks:
+    - name: Update Package Cache
+      apt:
+        update_cache: yes
+
+    - name: Upgrade All Packages
+      apt:
+        upgrade: dist
+
+    - name: Autoremove Unused Packages
+      apt:
+        autoremove: yes
+
+    - name: Clean Up Cache
+      apt:
+        autoclean: yes

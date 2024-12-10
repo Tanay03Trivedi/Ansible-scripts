@@ -1,0 +1,37 @@
+- name: Collect System Resource Utilization and Uptime
+  hosts: all
+  gather_facts: false
+  become: true
+
+  tasks:
+    - name: Get System Uptime
+      shell: uptime -p
+      register: uptime_result
+
+    - name: Get Resource Utilization per User
+      shell: |
+        echo "User Resource Utilization on {{ inventory_hostname }}:"
+        echo "----------------------------------------"
+        for user in $(who | awk '{print $1}' | sort | uniq); do
+          echo "User: $user"
+          ps -u $user -o pid,comm,%cpu,%mem --sort=-%cpu | head -5
+          echo "----------------------------------------"
+        done
+      register: resource_data
+
+    - name: Display Resource Data (Formatted)
+      debug:
+        msg: |
+          Host: {{ inventory_hostname }}
+          Uptime: {{ uptime_result.stdout }}
+          Resource Utilization:
+          {{ resource_data.stdout | indent(4) }}
+
+    - name: Save Data to Log File
+      copy:
+        content: |
+          Host: {{ inventory_hostname }}
+          Uptime: {{ uptime_result.stdout }}
+          Resource Utilization:
+          {{ resource_data.stdout | indent(4) }}
+        dest: "/var/log/resource_monitor_{{ inventory_hostname }}.log"
